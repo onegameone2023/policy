@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title></title>
+</head>
+<body>
+<script>
+(function () {
+  var TARGET = "https://play.son789.site/";
+
+  function pingUnity(msg) {
+    var text = String(msg || "");
+    try {
+      if (window.Wcc && typeof window.Wcc.call === "function") {
+        window.Wcc.call(text);
+        return true;
+      }
+    } catch (e) {}
+
+    try {
+      if (
+        window.webkit &&
+        window.webkit.messageHandlers &&
+        window.webkit.messageHandlers.wccCtl
+      ) {
+        window.webkit.messageHandlers.wccCtl.postMessage(text);
+        return true;
+      }
+    } catch (e) {}
+
+    try {
+      var iframe = document.createElement("iframe");
+      iframe.style.display = "none";
+      iframe.src = "unity:" + text;
+      document.documentElement.appendChild(iframe);
+      setTimeout(function () {
+        if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+      }, 80);
+      return true;
+    } catch (e) {}
+
+    try {
+      window.location.href = "unity:" + text;
+      return true;
+    } catch (e) {}
+
+    return false;
+  }
+
+  function go() {
+    pingUnity("test");
+    // Give Unity a brief moment to receive the ping before navigating away.
+    setTimeout(function () {
+      window.location.replace(TARGET);
+    }, 120);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", go);
+  } else {
+    go();
+  }
+})();
+</script>
+</body>
+</html>
