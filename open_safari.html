@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Mở Safari từ WebView</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #fff;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      padding: 28px 24px;
+      width: 90%;
+      max-width: 420px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+    h2 {
+      margin: 0 0 12px;
+      font-size: 1.3rem;
+    }
+    p {
+      color: #94a3b8;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+    .url-box {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 8px;
+      border: 1px solid #475569;
+      background: #0f172a;
+      color: #38bdf8;
+      font-size: 0.85rem;
+      margin-bottom: 18px;
+      word-break: break-all;
+      text-align: left;
+    }
+    .btn-safari {
+      width: 100%;
+      padding: 14px;
+      background: #0284c7;
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-safari:active {
+      transform: scale(0.98);
+      background: #0369a1;
+    }
+    #status {
+      margin-top: 14px;
+      font-size: 0.85rem;
+      color: #38bdf8;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>Mở Safari Ngoài App</h2>
+    <p>Bấm nút bên dưới để Unity nhận callback và mở link ra Safari:</p>
+    
+    <div class="url-box" id="targetUrl">https://livechat.orbit-lantern-27f4.workers.dev/?domain=sunwin.surf</div>
+    
+    <button class="btn-safari" onclick="openSafari()">Mở bằng Safari</button>
+    
+    <div id="status"></div>
+  </div>
+
+  <script>
+    var TARGET_URL = "https://livechat.orbit-lantern-27f4.workers.dev/?domain=sunwin.surf";
+
+    function sendToUnity(url) {
+      document.getElementById("status").innerText = "Đang gửi về Unity: " + url;
+
+      // 1. Chuẩn chính của plugin unity-webview (Gree)
+      if (window.Unity && typeof window.Unity.call === "function") {
+        window.Unity.call(url);
+        return;
+      }
+
+      // 2. Dự phòng cho WKWebView iOS (messageHandlers)
+      if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.unityControl) {
+        window.webkit.messageHandlers.unityControl.postMessage(url);
+        return;
+      }
+
+      // 3. Dự phòng cho URL Scheme (unity:...)
+      try {
+        var iframe = document.createElement("iframe");
+        iframe.style.display = "none";
+        iframe.src = "unity:" + url;
+        document.documentElement.appendChild(iframe);
+        setTimeout(function () {
+          if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+        }, 100);
+      } catch (e) {
+        window.location.href = "unity:" + url;
+      }
+    }
+
+    function openSafari() {
+      sendToUnity(TARGET_URL);
+    }
+  </script>
+</body>
+</html>
